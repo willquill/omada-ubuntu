@@ -1,12 +1,50 @@
 # omada-docker
 
-This guide has three sets of instructions for installing an Omada Controller.
+This guide has four sets of instructions for installing an Omada Controller.
 
-1. [**Easiest**](#omada-controller-in-docker): Run your Omada controller as a docker container wherever you want
-2. [**But why?**](#omada-controller-automatically-as-lxc-in-proxmox): Install Omada Controller automatically in a Rocky Linux LXC container in Proxmox
-3. [**Are you insane?**](#omada-controller-manually-as-lxc-in-proxmox): Install Omada Controller manually in an Ubuntu 16.04 LXC container in Proxmox
+1. [**Easiest**](#omada-controller-with-docker-compose): Run your Omada controller as a docker container via Docker Compose
+2. [**Easy**](#omada-controller-with-docker-run): Run your Omada controller as a docker container wherever you want
+3. [**But why?**](#omada-controller-automatically-as-lxc-in-proxmox): Install Omada Controller automatically in a Rocky Linux LXC container in Proxmox
+4. [**Are you insane?**](#omada-controller-manually-as-lxc-in-proxmox): Install Omada Controller manually in an Ubuntu 16.04 LXC container in Proxmox
 
-## Omada Controller in Docker
+## Omada Controller with Docker Compose
+
+Create the appropriate directories for the volumes and then use this compose file:
+
+```yaml
+version: '3.3'
+services:
+  omada-controller:
+    container_name: omada-controller
+    restart: unless-stopped
+    ports:
+      - '8088:8088'
+      - '8043:8043'
+      - '8843:8843'
+      - '29810:29810/udp'
+      - '29811:29811'
+      - '29812:29812'
+      - '29813:29813'
+      - '29814:29814'
+    environment:
+      - MANAGE_HTTP_PORT=8088
+      - MANAGE_HTTPS_PORT=8043
+      - PORTAL_HTTP_PORT=8088
+      - PORTAL_HTTPS_PORT=8843
+      - SHOW_SERVER_LOGS=true
+      - SHOW_MONGODB_LOGS=false
+      - SSL_CERT_NAME=tls.crt
+      - SSL_KEY_NAME=tls.key
+      - TZ=America/Chicago
+    volumes:
+      - './omada-data:/opt/tplink/EAPController/data'
+      - './omada-work:/opt/tplink/EAPController/work'
+      - './omada-logs:/opt/tplink/EAPController/logs'
+      - './omada-cert:/cert'
+    image: 'mbentley/omada-controller:5.0'
+```
+
+## Omada Controller with Docker Run
 
 Source: [https://registry.hub.docker.com/r/mbentley/omada-controller/#!](https://registry.hub.docker.com/r/mbentley/omada-controller/#!)
 
